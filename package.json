@@ -6,10 +6,14 @@
   "author": "JeffreyRiggle <JeffreyRiggle@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "electron-webpack dev"
+    "dev": "electron-webpack dev",
+    "compile": "electron-webpack",
+    "dist": "yarn compile && electron-builder",
+    "dist:dir": "yarn dist -- --dir -c.compression=store -c.mac.identity=null"
   },
   "devDependencies": {
     "electron": "^3.0.11",
+    "electron-builder": "^20.38.3",
     "electron-webpack": "^2.6.1",
     "webpack": "^4.27.1"
   },
