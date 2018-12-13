@@ -1,0 +1,19 @@
+{
+  "name": "robitclientnative",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/JeffreyRiggle/robitclientnative",
+  "author": "JeffreyRiggle <JeffreyRiggle@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-webpack dev"
+  },
+  "devDependencies": {
+    "electron": "^3.0.11",
+    "electron-webpack": "^2.6.1",
+    "webpack": "^4.27.1"
+  },
+  "dependencies": {
+    "source-map-support": "^0.5.9"
+  }
+}
