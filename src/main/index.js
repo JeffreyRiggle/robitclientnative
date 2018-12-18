@@ -1,7 +1,8 @@
 'use strict'
 
 import { app, BrowserWindow } from 'electron'
-import start from './ipcBridge';
+import { start } from './ipcBridge';
+import './handlers';
 
 let mainWindow
 
