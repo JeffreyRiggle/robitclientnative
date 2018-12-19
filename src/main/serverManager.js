@@ -103,18 +103,20 @@ function startServer(event, config) {
         stdio: 'ignore'
     });
 
+    childProc.on('error', err => {
+        console.log(`Server got error ${err}`);
+    });
+
+    childProc.on('exit', () => {
+        console.log('Server was killed.');
+        serverCleanUp();
+    });
+
     updateStateAndBroadCast('started');
     startPollingServerUsage();
 }
 
-function stopServer() {
-    if (!childProc) {
-        updateStateAndBroadCast('error');
-        console.log('Cannot kill process it is not running');
-        return;
-    }
-
-    childProc.kill();
+function serverCleanUp() {
     childProc = null;
 
     if (serverUsagePoll) {
@@ -125,6 +127,17 @@ function stopServer() {
 
     updateStateAndBroadCast('stopped');
     sendServerHealth();
+}
+
+function stopServer() {
+    if (!childProc) {
+        updateStateAndBroadCast('error');
+        console.log('Cannot kill process it is not running');
+        return;
+    }
+
+    childProc.kill();
+    serverCleanUp();
 }
 
 function updateStateAndBroadCast(newstate) {
