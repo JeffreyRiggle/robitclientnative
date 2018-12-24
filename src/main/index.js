@@ -11,7 +11,7 @@ function createMainWindow() {
   const window = new BrowserWindow();
 
   window.webContents.openDevTools();
-  window.loadURL('http://localhost:3000');
+  window.loadURL('http://localhost:3000/robit');
 
   window.on('closed', () => {
     mainWindow = null;
