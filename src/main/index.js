@@ -4,14 +4,19 @@ import { app, BrowserWindow } from 'electron'
 import { start } from './ipcBridge';
 import './handlers';
 
-let mainWindow
+let mainWindow;
+const isDev = process.env.NODE_ENV !== 'production';
+const appUrl = isDev ? 'http://localhost:3000/robit' : 'http://ilusr.com/robit';
 
 function createMainWindow() {
   start();
   const window = new BrowserWindow();
 
-  window.webContents.openDevTools();
-  window.loadURL('http://localhost:3000/robit');
+  if (isDev) {
+    window.webContents.openDevTools();
+  }
+
+  window.loadURL(appUrl);
 
   window.on('closed', () => {
     mainWindow = null;

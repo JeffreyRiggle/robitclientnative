@@ -1,10 +1,10 @@
 import fs from 'fs';
 import { spawn, exec } from 'child_process';
 import { registerEvent, broadcast } from './ipcBridge';
+import serverContents from 'raw-loader!../../builtServer/bundle';
 
 const appData = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : '/var/local');
 const dir = appData + '/robitserver';
-const serverContents = fs.readFileSync(__dirname + '/../../builtServer/bundle.js');
 const stateevent = 'serverstate';
 const dayInterval = 1 * 24 * 60 * 60 * 1000;
 const hourInterval = 1 * 60 * 60 * 1000;
