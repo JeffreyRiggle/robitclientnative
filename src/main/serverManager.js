@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { spawn, exec } from 'child_process';
-import { registerEvent, broadcast } from './ipcBridge';
+import { registerEvent, broadcast } from '@jeffriggle/ipc-bridge-server';
 import serverContents from 'raw-loader!../../builtServer/bundle';
 
 const appData = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : '/var/local');

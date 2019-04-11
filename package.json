@@ -19,6 +19,7 @@
     "webpack": "^4.27.1"
   },
   "dependencies": {
+    "@jeffriggle/ipc-bridge-server": "^1.0.2",
     "source-map-support": "^0.5.9"
   }
 }
