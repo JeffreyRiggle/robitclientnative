@@ -10,6 +10,7 @@ const dayInterval = 1 * 24 * 60 * 60 * 1000;
 const hourInterval = 1 * 60 * 60 * 1000;
 const minuteInterval = 1 * 60 * 1000;
 const secondInterval = 1000;
+const linuxMemoryReg = /VmSize:\s*([\d\skBmg]*)/;
 
 let childProc, serverUsagePoll, upTime;
 let state = 'stopped';
@@ -54,13 +55,18 @@ function sendServerHealth(memory, cpu) {
     });
 }
 
-function getServerUsage() {
-    if (process.platform !== 'win32') {
-        console.log(`Health check is not supported on ${process.platform}`);
-        sendServerHealth();
-        return;
-    }
+function getLinuxHealth() {
+    fs.readFile(`/proc/${childProc.pid}/status`, (err, data) => {
+        let memory = linuxMemoryReg.exec(data.toString())[1];
+        
+        exec(`ps -p ${childProc.pid} -o %cpu`, (err, stdout) => {
+            let cpu = stdout.replace('%CPU', '') + '%';
+            sendServerHealth(memory, cpu);
+        });
+    });
+}
 
+function getWindowsHealth() {
     exec(`tasklist /v /fi "PID eq ${childProc.pid}" /fo csv`, (err, stdout, stderr) => {
         if (err) {
             console.log(`Got error ${err} when attempting to read task list`);
@@ -72,6 +78,20 @@ function getServerUsage() {
 
         sendServerHealth(mem, cpu);
     });
+}
+
+function getServerUsage() {
+    if (process.platform === 'linux') {
+        getLinuxHealth();
+        return;
+    }
+    if (process.platform === 'win32') {
+        getWindowsHealth();
+        return;
+    }
+
+    console.log(`Health check is not supported on ${process.platform}`);
+    sendServerHealth();
 }
 
 function startPollingServerUsage() {
@@ -95,7 +115,7 @@ function startServer(event, config) {
         fs.mkdirSync(dir);
     }
 
-    console.log('Starting robit server');
+    console.log(`Starting robit server in location ${dir}`);
     fs.writeFileSync(dir + '/server.js', serverContents);
     fs.writeFileSync(dir + '/config.json', JSON.stringify(config));
     childProc = spawn('node', [`${dir}/server.js`,  `${dir}/config.json`], {
