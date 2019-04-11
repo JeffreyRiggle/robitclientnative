@@ -6,6 +6,7 @@ import serverContents from 'raw-loader!../../builtServer/bundle';
 const appData = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : '/var/local');
 const dir = appData + '/robitserver';
 const stateevent = 'serverstate';
+const serverEvent = 'serverdata';
 const dayInterval = 1 * 24 * 60 * 60 * 1000;
 const hourInterval = 1 * 60 * 60 * 1000;
 const minuteInterval = 1 * 60 * 1000;
@@ -108,7 +109,9 @@ function startServer(event, config) {
     if (childProc) {
         updateStateAndBroadCast('error');
         console.log('Cannot start process it is already started');
-        return;
+        return {
+            success: false
+        };
     }
 
     if (!fs.existsSync(dir)) {
@@ -118,10 +121,7 @@ function startServer(event, config) {
     console.log(`Starting robit server in location ${dir}`);
     fs.writeFileSync(dir + '/server.js', serverContents);
     fs.writeFileSync(dir + '/config.json', JSON.stringify(config));
-    childProc = spawn('node', [`${dir}/server.js`,  `${dir}/config.json`], {
-        detached: true,
-        stdio: 'ignore'
-    });
+    childProc = spawn('node', [`${dir}/server.js`,  `${dir}/config.json`]);
 
     childProc.on('error', err => {
         console.log(`Server got error ${err}`);
@@ -132,8 +132,17 @@ function startServer(event, config) {
         serverCleanUp();
     });
 
+    childProc.stdout.on('data', (data) => {
+        console.log(`Got data from child process: ${data}`);
+        broadcast(serverEvent, data);
+    });
+
     updateStateAndBroadCast('started');
     startPollingServerUsage();
+
+    return {
+        success: true
+    }
 }
 
 function serverCleanUp() {
@@ -158,6 +167,10 @@ function stopServer() {
 
     childProc.kill();
     serverCleanUp();
+
+    return {
+        success: true
+    };
 }
 
 function updateStateAndBroadCast(newstate) {
