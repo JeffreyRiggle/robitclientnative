@@ -2,6 +2,7 @@ import fs from 'fs';
 import { spawn, exec } from 'child_process';
 import { registerEvent, broadcast } from '@jeffriggle/ipc-bridge-server';
 import serverContents from 'raw-loader!../../builtServer/bundle';
+import moment from 'moment';
 
 const appData = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : '/var/local');
 const dir = appData + '/robitserver';
@@ -134,7 +135,7 @@ function startServer(event, config) {
 
     childProc.stdout.on('data', (data) => {
         console.log(`Got data from child process: ${data}`);
-        broadcast(serverEvent, data);
+        broadcast(serverEvent, `${moment().format('HH:mm:ss.SSS')} : ${data}`);
     });
 
     updateStateAndBroadCast('started');

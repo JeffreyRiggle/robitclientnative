@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@jeffriggle/ipc-bridge-server": "^1.0.2",
+    "moment": "^2.24.0",
     "source-map-support": "^0.5.9"
   }
 }
