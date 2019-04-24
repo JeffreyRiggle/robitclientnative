@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { spawn, exec } from 'child_process';
 import { registerEvent, broadcast } from '@jeffriggle/ipc-bridge-server';
-import serverContents from 'raw-loader!../../builtServer/bundle';
 import moment from 'moment';
+import request from 'request';
 
 const appData = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : '/var/local');
 const dir = appData + '/robitserver';
@@ -16,6 +16,7 @@ const linuxMemoryReg = /VmSize:\s*([\d\skBmg]*)/;
 
 let childProc, serverUsagePoll, upTime;
 let state = 'stopped';
+let serverContents;
 
 function formatUpTime(ms) {
     let days = 0, hours = 0, minutes = 0, seconds = 0;
@@ -104,22 +105,7 @@ function startPollingServerUsage() {
     }, 10000);
 }
 
-function startServer(event, config) {
-    updateStateAndBroadCast('loading');
-
-    if (childProc) {
-        updateStateAndBroadCast('error');
-        console.log('Cannot start process it is already started');
-        return {
-            success: false
-        };
-    }
-
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
-    }
-
-    console.log(`Starting robit server in location ${dir}`);
+function spawnLocalServer(dir, config) {
     fs.writeFileSync(dir + '/server.js', serverContents);
     fs.writeFileSync(dir + '/config.json', JSON.stringify(config));
     childProc = spawn('node', [`${dir}/server.js`,  `${dir}/config.json`]);
@@ -140,6 +126,34 @@ function startServer(event, config) {
 
     updateStateAndBroadCast('started');
     startPollingServerUsage();
+}
+
+function startServer(event, config) {
+    updateStateAndBroadCast('loading');
+
+    if (childProc) {
+        updateStateAndBroadCast('error');
+        console.log('Cannot start process it is already started');
+        return {
+            success: false
+        };
+    }
+
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+    }
+
+    console.log(`Starting robit server in location ${dir}`);
+    if (serverContents) {
+        spawnLocalServer(dir, config);
+        return { success: true };   
+    }
+
+    console.log('Server contents are unknown fetching those now');
+    request.get('https://raw.githubusercontent.com/JeffreyRiggle/somerobit/master/dist/bundle.js', (err, response, body) => {
+        serverContents = body;
+        spawnLocalServer(dir, config);
+    });
 
     return {
         success: true
