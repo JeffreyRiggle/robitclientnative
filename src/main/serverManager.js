@@ -17,6 +17,11 @@ const linuxMemoryReg = /VmSize:\s*([\d\skBmg]*)/;
 let childProc, serverUsagePoll, upTime;
 let state = 'stopped';
 let serverContents;
+let hasDocker = false;
+
+exec('docker --version', (err, stdout, stderr) => {
+    hasDocker = !err && !stderr;
+});
 
 function formatUpTime(ms) {
     let days = 0, hours = 0, minutes = 0, seconds = 0;
@@ -198,6 +203,17 @@ function getServerState(event) {
     event.send(stateevent, state);
 }
 
+function getServerTypes() {
+    let retVal = ['Local'];
+    if (hasDocker) {
+        retVal.push('Docker');
+    }
+
+    console.log('Got server types request');
+    return retVal;
+}
+
 registerEvent('startserver', startServer);
 registerEvent('stopserver', stopServer);
 registerEvent(stateevent, getServerState);
+registerEvent('serverTypes', getServerTypes);
