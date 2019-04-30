@@ -3,51 +3,23 @@ import { spawn, exec } from 'child_process';
 import { registerEvent, broadcast } from '@jeffriggle/ipc-bridge-server';
 import moment from 'moment';
 import request from 'request';
+import formatUpTime from './helpers/formatUpTime';
+import { startDockerServer, stopDockerServer, dockerEnabled } from './servers/dockerServer';
 
 const appData = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : '/var/local');
 const dir = appData + '/robitserver';
 const stateevent = 'serverstate';
 const serverEvent = 'serverdata';
-const dayInterval = 1 * 24 * 60 * 60 * 1000;
-const hourInterval = 1 * 60 * 60 * 1000;
-const minuteInterval = 1 * 60 * 1000;
-const secondInterval = 1000;
 const linuxMemoryReg = /VmSize:\s*([\d\skBmg]*)/;
 
-let childProc, serverUsagePoll, upTime;
+let childProc, serverUsagePoll, upTime, runningServerType;
 let state = 'stopped';
 let serverContents;
 let hasDocker = false;
 
-exec('docker --version', (err, stdout, stderr) => {
-    hasDocker = !err && !stderr;
+dockerEnabled().then((enabled) => {
+    hasDocker = enabled;
 });
-
-function formatUpTime(ms) {
-    let days = 0, hours = 0, minutes = 0, seconds = 0;
-
-    while(ms >= dayInterval) {
-        days++;
-        ms -= dayInterval;
-    }
-
-    while(ms >= hourInterval) {
-        hours++;
-        ms -= hourInterval
-    }
-
-    while(ms >= minuteInterval) {
-        minutes++;
-        ms -= minuteInterval
-    }
-
-    while(ms >= secondInterval) {
-        seconds++;
-        ms -= secondInterval;
-    }
-
-    return `${days}:${hours <= 9 ? '0' : ''}${hours}:${minutes <= 9 ? '0' : ''}${minutes}:${seconds <= 9 ? '0' : ''}${seconds}:${ms}`
-}
 
 function sendServerHealth(memory, cpu) {
     let liveTime = 'N/A';
@@ -133,17 +105,7 @@ function spawnLocalServer(dir, config) {
     startPollingServerUsage();
 }
 
-function startServer(event, config) {
-    updateStateAndBroadCast('loading');
-
-    if (childProc) {
-        updateStateAndBroadCast('error');
-        console.log('Cannot start process it is already started');
-        return {
-            success: false
-        };
-    }
-
+function startLocalServer(config) {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
@@ -160,8 +122,43 @@ function startServer(event, config) {
         spawnLocalServer(dir, config);
     });
 
+    runningServerType = 'Local';
+
     return {
         success: true
+    }
+}
+
+function startDocker(config) {
+    startDockerServer(config).then(() => {
+        upTime = Date.now();
+        updateStateAndBroadCast('started');
+    });
+
+    runningServerType = 'Docker';
+
+    return {
+        success: true
+    }
+}
+
+function startServer(event, data) {
+    updateStateAndBroadCast('loading');
+
+    if (childProc) {
+        updateStateAndBroadCast('error');
+        console.log('Cannot start process it is already started');
+        return {
+            success: false
+        };
+    }
+
+    if (data.type === 'Local') {
+        return startLocalServer(data.config);
+    } else if (data.type === 'Docker') {
+        return startDocker(data.config);
+    } else {
+        return { success: false };
     }
 }
 
@@ -178,7 +175,7 @@ function serverCleanUp() {
     sendServerHealth();
 }
 
-function stopServer() {
+function killLocalServer() {
     if (!childProc) {
         updateStateAndBroadCast('error');
         console.log('Cannot kill process it is not running');
@@ -191,6 +188,38 @@ function stopServer() {
     return {
         success: true
     };
+}
+
+function killDockerServer() {
+    stopDockerServer();
+
+    updateStateAndBroadCast('stopped');
+    sendServerHealth();
+
+    return {
+        success: true
+    }
+}
+
+function stopServer() {
+    if (!runningServerType) {
+        updateStateAndBroadCast('error');
+        console.log('No server type is defined');
+        return;
+    }
+
+    if (runningServerType === 'Local') {
+        return killLocalServer();
+    }
+
+    if (runningServerType === 'Docker') {
+        return killDockerServer();
+    }
+
+    console.log(`Unknown server type ${runningServerType}`);
+    return {
+        success: false
+    }
 }
 
 function updateStateAndBroadCast(newstate) {
