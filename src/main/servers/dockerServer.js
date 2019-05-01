@@ -1,7 +1,9 @@
 import { exec } from 'child_process';
 import request from 'request';
+import { updateStateAndBroadCast } from '../serverState';
+import { sendServerHealth } from '../helpers/notifications';
 
-let pollingInterval;
+let pollingInterval, serverUsagePoll, upTime;
 
 function waitUp(timeout) {
     const startTime = Date.now();
@@ -22,7 +24,7 @@ function waitUp(timeout) {
     });
 }
 
-const startDockerServer = (config) => {
+function startRunningDockerServer(config) {
     return new Promise((resolve, reject) => {
         exec('docker pull jeffriggle/robit && docker run -p 8080:8080 -d jeffriggle/robit', (err, stdout, stderr) => {
             if (err) {
@@ -50,8 +52,40 @@ const startDockerServer = (config) => {
     });
 }
 
+function notifyServerHealth() {
+    sendServerHealth(null, null, upTime);
+}
+
+function startPollingServerUsage() {
+    upTime = Date.now();
+    notifyServerHealth();
+
+    serverUsagePoll = setInterval(() => {
+        notifyServerHealth();
+    }, 10000);
+}
+
+const startDockerServer = (config) => {
+    startRunningDockerServer(config).then(() => {
+        startPollingServerUsage();
+        updateStateAndBroadCast('started');
+    });
+
+    return {
+        success: true
+    }
+}
+
 const stopDockerServer = () => {
     request.post('http://localhost:8080/robit/stop');
+
+    clearInterval(serverUsagePoll);
+    updateStateAndBroadCast('stopped');
+    sendServerHealth();
+
+    return {
+        success: true
+    }
 }
 
 const dockerEnabled = () => {
