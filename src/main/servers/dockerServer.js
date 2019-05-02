@@ -1,9 +1,11 @@
 import { exec } from 'child_process';
 import request from 'request';
+import { broadcast } from '@jeffriggle/ipc-bridge-server';
 import { updateStateAndBroadCast } from '../serverState';
 import { sendServerHealth } from '../helpers/notifications';
+import events from '../events';
 
-let pollingInterval, serverUsagePoll, upTime;
+let pollingInterval, dataUsagePoll, serverUsagePoll, upTime;
 
 function waitUp(timeout) {
     const startTime = Date.now();
@@ -65,9 +67,32 @@ function startPollingServerUsage() {
     }, 10000);
 }
 
+function getServerLogs() {
+    request.get('http://localhost:8080/robit/logging', (err, response, body) => {
+        let data = JSON.parse(body);
+        
+        if (data.length) {
+            broadcast(events.serverData, data.join('\r\n'));
+        }
+    });
+}
+
+function startPollingServerData() {
+    getServerLogs();
+
+    dataUsagePoll = setInterval(() => {
+        getServerLogs();
+    }, 1000);
+}
+
+function startPolling() {
+    startPollingServerUsage();
+    startPollingServerData();
+}
+
 const startDockerServer = (config) => {
     startRunningDockerServer(config).then(() => {
-        startPollingServerUsage();
+        startPolling();
         updateStateAndBroadCast('started');
     });
 
@@ -80,6 +105,7 @@ const stopDockerServer = () => {
     request.post('http://localhost:8080/robit/stop');
 
     clearInterval(serverUsagePoll);
+    clearInterval(dataUsagePoll);
     updateStateAndBroadCast('stopped');
     sendServerHealth();
 
