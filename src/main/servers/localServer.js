@@ -67,6 +67,22 @@ function spawnLocalServer(dir, config) {
     startPollingServerUsage();
 }
 
+function fetchAndStartServer(dir, config) {
+    return new Promise((resolve, reject) => {
+        console.log('Server contents are unknown fetching those now');
+        request.get('https://raw.githubusercontent.com/JeffreyRiggle/somerobit/master/dist/bundle.js', (err, response, body) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            serverContents = body;
+            spawnLocalServer(dir, config);
+            resolve({ success: true });
+        });
+    });
+}
+
 const startLocalServer = (config) => {
     if (childProc) {
         updateStateAndBroadCast('error');
@@ -86,16 +102,8 @@ const startLocalServer = (config) => {
         spawnLocalServer(dir, config);
         return { success: true };   
     }
-
-    console.log('Server contents are unknown fetching those now');
-    request.get('https://raw.githubusercontent.com/JeffreyRiggle/somerobit/master/dist/bundle.js', (err, response, body) => {
-        serverContents = body;
-        spawnLocalServer(dir, config);
-    });
-
-    return {
-        success: true
-    }
+    
+    return fetchAndStartServer(dir, config);
 }
 
 const stopLocalServer = () => {

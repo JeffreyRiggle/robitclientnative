@@ -547,10 +547,10 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@jeffriggle/ipc-bridge-server@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@jeffriggle/ipc-bridge-server/-/ipc-bridge-server-1.0.2.tgz#d33330ac0fd31152ee132f7e08ae010e0246053e"
-  integrity sha512-LmmFnf4w6hEPKSmsekJlLxFhgmaBAGpL3PPiFZkz97OAGuN5esdIQzKON11xa3L+7Q0KmGrnzpCl16SnPQ7WzQ==
+"@jeffriggle/ipc-bridge-server@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@jeffriggle/ipc-bridge-server/-/ipc-bridge-server-1.0.4.tgz#18e08231023d4a89a6ec9c0b6fc58e1f087be686"
+  integrity sha512-C6HAna/HO48AdZjHSmLYN/ge7cP9erUEy63K5gJJLc16N0s6UifdfRrRQ56mzCHHslf4CDpI2UMToLWpjKUnzA==
   dependencies:
     chai "^4.2.0"
     electron "^4.1.3"

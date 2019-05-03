@@ -91,14 +91,12 @@ function startPolling() {
 }
 
 const startDockerServer = (config) => {
-    startRunningDockerServer(config).then(() => {
+    return startRunningDockerServer(config).then(() => {
         startPolling();
         updateStateAndBroadCast('started');
-    });
 
-    return {
-        success: true
-    }
+        return { success: true };
+    });
 }
 
 const stopDockerServer = () => {
