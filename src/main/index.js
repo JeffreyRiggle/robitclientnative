@@ -10,7 +10,11 @@ const appUrl = isDev ? 'http://localhost:3000/robit' : 'http://ilusr.com/robit';
 
 function createMainWindow() {
   start();
-  const window = new BrowserWindow();
+  const window = new BrowserWindow({
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
 
   if (isDev) {
     window.webContents.openDevTools();
