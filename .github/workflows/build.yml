@@ -14,8 +14,8 @@ jobs:
 
     - name: Setup System
       run: |
-        apt-get update
-        apt-get install wine64 -y
+        sudo apt-get update
+        sudo apt-get install wine64 -y
     
     - name: Check out code
       uses: actions/checkout@v1
