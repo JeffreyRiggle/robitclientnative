@@ -8,8 +8,7 @@
   "scripts": {
     "dev": "electron-webpack dev",
     "build": "electron-webpack",
-    "dist": "yarn build && electron-builder",
-    "dist:dir": "yarn dist -- --dir -c.compression=store -c.mac.identity=null"
+    "dist": "yarn build && electron-builder -mwl"
   },
   "devDependencies": {
     "electron": "^7.2.4",
