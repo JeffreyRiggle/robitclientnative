@@ -5,10 +5,18 @@
   "repository": "https://github.com/JeffreyRiggle/robitclientnative",
   "author": "JeffreyRiggle <JeffreyRiggle@gmail.com>",
   "license": "MIT",
+  "build": {
+    "appId": "com.ilusr.robitclient",
+    "productName": "Robit Client",
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Games"
+    }
+  },
   "scripts": {
     "dev": "electron-webpack dev",
     "build": "electron-webpack",
-    "dist": "yarn build && electron-builder -mwl"
+    "dist": "yarn build && electron-builder --windows --linux"
   },
   "devDependencies": {
     "electron": "^7.2.4",
