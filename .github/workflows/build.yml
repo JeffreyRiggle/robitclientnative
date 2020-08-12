@@ -1,28 +1,22 @@
-name: BuildJS
+name: BuildElectron
 on: [push, pull_request]
+
 jobs:
+  release:
+    runs-on: ${{ matrix.os }}
 
-  build:
-    name: Build
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
     steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
 
-    - name: Install node
-      uses: actions/setup-node@v1
-      with:
-          node-version: '10.x'
-    
-    - name: Check out code
-      uses: actions/checkout@v1
-    
-    - name: Install Yarn
-      run: npm install -g yarn
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10
 
-    - name: Install
-      run: yarn install --frozen-lockfile
-
-    - name: Build
-      run: |
-        docker run -v ${PWD}:/project --rm -i electronuserland/builder:wine
-        yarn run dist
-        exit
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
