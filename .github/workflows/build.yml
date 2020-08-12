@@ -23,6 +23,6 @@ jobs:
 
     - name: Build
       run: |
-        docker run -v ${PWD}:/project --rm -ti electronuserland/builder:wine
+        docker run -v ${PWD}:/project --rm -i electronuserland/builder:wine
         yarn run dist
         exit
