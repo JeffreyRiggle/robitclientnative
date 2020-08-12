@@ -2,7 +2,7 @@ name: BuildElectron
 on: [push, pull_request]
 
 jobs:
-  release:
+  build:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -20,3 +20,7 @@ jobs:
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
+        with:
+          # GitHub token, automatically provided to the action
+          # (No need to define this secret in the repo settings)
+          github_token: ${{ secrets.github_token }}
