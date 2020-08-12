@@ -11,14 +11,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
           node-version: '10.x'
-
-    - name: Setup System
-      run: |
-        sudo apt-get update
-        sudo apt-get install wine64 -y
-        sudo apt-get install --no-install-recommends -y libopenjp2-tools
-        sudo apt-get install --no-install-recommends -y rpm
-        sudo apt-get install --no-install-recommends -y bsdtar
     
     - name: Check out code
       uses: actions/checkout@v1
@@ -30,4 +22,7 @@ jobs:
       run: yarn install --frozen-lockfile
 
     - name: Build
-      run: yarn run dist
+      run: |
+        docker run -v ${PWD}:/project --rm -ti electronuserland/builder:wine
+        yarn run dist
+        exit
