@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "electron": "^7.2.4",
-    "electron-builder": "^20.38.3",
+    "electron-builder": "^22.8.0",
     "electron-webpack": "^2.6.1",
     "source-map-support": "^0.5.9",
     "raw-loader": "^1.0.0",
