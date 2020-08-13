@@ -55,19 +55,18 @@ jobs:
         github_token: ${{ secrets.github_token }}
 
     - name: Copy Release
-      run: echo checking OS
-    - if: matrix.os == 'ubuntu-latest'
-      run: |
-        files=("dist/*.AppImage")
-        cp ${files[0]} RobitClient.AppImage
-    - if: matrix.os == 'macos-latest'
-      run: |
-        files=("dist/*.dmg")
-        cp ${files[0]} RobitClient.dmg
-    - if: matrix.os == 'windows-latest'
-      run: |
-        files=("dist/*.exe")
-        cp ${files[0]} RobitClient.exe
+      if: matrix.os == 'ubuntu-latest'
+        run: |
+          files=("dist/*.AppImage")
+          cp ${files[0]} RobitClient.AppImage
+      if: matrix.os == 'macos-latest'
+        run: |
+          files=("dist/*.dmg")
+          cp ${files[0]} RobitClient.dmg
+      if: matrix.os == 'windows-latest'
+        run: |
+          files=("dist/*.exe")
+          cp ${files[0]} RobitClient.exe
 
     - name: Upload build
       id: upload_build
