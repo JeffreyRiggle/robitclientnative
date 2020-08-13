@@ -1,12 +1,16 @@
-name: BuildJS
+name: BuildElectron
 on: [push, pull_request]
 jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
-    steps:
+    runs-on: ${{ matrix.os }}
 
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
     - name: Install node
       uses: actions/setup-node@v1
       with:
@@ -24,7 +28,7 @@ jobs:
     - name: Build
       run: yarn run build
 
-    - name: Package
-      env:
-        GH_TOKEN: ${{ secrets.github_token }}
-      run: yarn electron-builder --linux
+    - name: Package Electron app
+      uses: samuelmeuli/action-electron-builder@v1
+      with:
+        github_token: ${{ secrets.github_token }}
