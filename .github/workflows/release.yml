@@ -5,8 +5,26 @@ on:
             - master
 
 jobs:
-  build:
+  release:
     name: Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.github_token }}
+      with:
+        tag_name: ${{ github.repository }}@${{ github.run_number }}
+        release_name: Release ${{ github.repository }}@${{ github.run_number }}
+        body: |
+          New release
+        draft: false
+        prerelease: false
+
+  build:
+    name: build
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -35,4 +53,42 @@ jobs:
       uses: samuelmeuli/action-electron-builder@v1
       with:
         github_token: ${{ secrets.github_token }}
-        release: true
+
+    - name: Copy Release
+      - if: matrix.os == 'ubuntu-latest'
+        run: |
+          files=("dist/*.AppImage")
+          cp ${files[0]} RobitClient.AppImage
+      - if: matrix.os == 'macos-latest'
+        run: |
+          files=("dist/*.dmg")
+          cp ${files[0]} RobitClient.dmg
+      - if: matrix.os == 'windows-latest'
+        run: |
+          files=("dist/*.exe")
+          cp ${files[0]} RobitClient.exe
+
+    - name: Upload build
+      id: upload_build
+      uses: actions/upload-release-asset@v1
+      - if: matrix.os == 'ubuntu-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./RobitClient.AppImage
+          asset_name: RobitClient.AppImage
+      - if: matrix.os == 'macos-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./RobitClient.dmg
+          asset_name: RobitClient.dmg
+      - if: matrix.os == 'windows-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./RobitClient.exe
+          asset_name: RobitClient.exe
