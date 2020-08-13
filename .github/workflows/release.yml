@@ -55,6 +55,7 @@ jobs:
         github_token: ${{ secrets.github_token }}
 
     - name: Copy Release
+      run: echo checking OS
     - if: matrix.os == 'ubuntu-latest'
       run: |
         files=("dist/*.AppImage")
