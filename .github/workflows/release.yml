@@ -1,9 +1,12 @@
-name: BuildElectron
-on: [push, pull_request]
-jobs:
+name: ReleaseElectron
+on:
+    push:
+        branches:
+            - master
 
+jobs:
   build:
-    name: Build
+    name: Release
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -32,3 +35,4 @@ jobs:
       uses: samuelmeuli/action-electron-builder@v1
       with:
         github_token: ${{ secrets.github_token }}
+        release: true
