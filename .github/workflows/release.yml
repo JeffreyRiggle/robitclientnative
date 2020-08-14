@@ -67,4 +67,5 @@ jobs:
     - if: matrix.os == 'windows-latest'
       shell: powershell
       run: |
-        Get-ChildItem -Path \dist\*.exe | Move-Item -Destination RobitClient.exe
+        Get-ChildItem -Path dist\*.exe | Move-Item -Destination RobitClient.exe
+        ls
