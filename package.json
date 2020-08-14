@@ -11,6 +11,9 @@
     "linux": {
       "target": ["AppImage"],
       "category": "Games"
+    },
+    "publish": {
+      "releaseType": "release"
     }
   },
   "scripts": {
