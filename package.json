@@ -1,6 +1,6 @@
 {
   "name": "robitclientnative",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "repository": "https://github.com/JeffreyRiggle/robitclientnative",
   "author": "JeffreyRiggle <JeffreyRiggle@gmail.com>",
@@ -11,9 +11,6 @@
     "linux": {
       "target": ["AppImage"],
       "category": "Games"
-    },
-    "publish": {
-      "releaseType": "release"
     }
   },
   "scripts": {
