@@ -5,24 +5,6 @@ on:
             - master
 
 jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.github_token }}
-      with:
-        tag_name: ${{ github.repository }}@${{ github.run_number }}
-        release_name: Release ${{ github.repository }}@${{ github.run_number }}
-        body: |
-          New release
-        draft: false
-        prerelease: false
-
   build:
     name: build
     runs-on: ${{ matrix.os }}
@@ -70,6 +52,19 @@ jobs:
         Get-ChildItem -Path dist\*.exe | Move-Item -Destination RobitClient.exe
         ls
     
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.github_token }}
+      with:
+        tag_name: ${{ github.repository }}@${{ github.run_number }}
+        release_name: Release ${{ github.repository }}@${{ github.run_number }}
+        body: |
+          New release
+        draft: false
+        prerelease: false
+
     - name: Upload Installer
       id: upload_installer
       uses: actions/upload-release-asset@v1
