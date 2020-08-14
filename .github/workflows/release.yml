@@ -35,43 +35,5 @@ jobs:
       uses: samuelmeuli/action-electron-builder@v1
       with:
         github_token: ${{ secrets.github_token }}
-
-    - name: Copy Release
-      run: echo checking OS
-    - if: matrix.os == 'ubuntu-latest'
-      run: |
-        files=("dist/*.AppImage")
-        cp ${files[0]} RobitClient.AppImage
-    - if: matrix.os == 'macos-latest'
-      run: |
-        files=("dist/*.dmg")
-        cp ${files[0]} RobitClient.dmg
-    - if: matrix.os == 'windows-latest'
-      shell: powershell
-      run: |
-        Get-ChildItem -Path dist\*.exe | Move-Item -Destination RobitClient.exe
-        ls
-    
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.github_token }}
-      with:
-        tag_name: ${{ github.repository }}@${{ github.run_number }}
-        release_name: Release ${{ github.repository }}@${{ github.run_number }}
-        body: |
-          New release
-        draft: false
-        prerelease: false
-
-    - name: Upload Installer
-      id: upload_installer
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.github_token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./RobitClient.exe
-        asset_name: RobitClient.exe
-        asset_content_type: application/octet-stream
+        release: true
+        releaseType: release
