@@ -65,6 +65,6 @@ jobs:
         files=("dist/*.dmg")
         cp ${files[0]} RobitClient.dmg
     - if: matrix.os == 'windows-latest'
+      shell: powershell
       run: |
-        files=("dist/*.exe")
-        cp ${files[0]} RobitClient.exe
+        Get-ChildItem -Path \dist\*.exe | Move-Item -Destination RobitClient.exe
