@@ -69,3 +69,14 @@ jobs:
       run: |
         Get-ChildItem -Path dist\*.exe | Move-Item -Destination RobitClient.exe
         ls
+    
+    - name: Upload Installer
+      id: upload_installer
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.github_token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./RobitClient.exe
+        asset_name: RobitClient.exe
+        asset_content_type: application/octet-stream
