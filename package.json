@@ -9,7 +9,9 @@
     "appId": "com.ilusr.robitclient",
     "productName": "Robit Client",
     "linux": {
-      "target": ["AppImage"],
+      "target": [
+        "AppImage"
+      ],
       "category": "Games"
     }
   },
@@ -21,12 +23,13 @@
     "electron": "^7.2.4",
     "electron-builder": "^22.8.0",
     "electron-webpack": "^2.6.1",
-    "source-map-support": "^0.5.9",
     "raw-loader": "^1.0.0",
+    "source-map-support": "^0.5.9",
     "webpack": "^4.27.1"
   },
   "dependencies": {
     "@jeffriggle/ipc-bridge-server": "^1.0.6",
+    "@octokit/rest": "^18.0.3",
     "moment": "^2.24.0",
     "request": "^2.88.0"
   }

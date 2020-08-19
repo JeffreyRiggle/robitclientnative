@@ -1,14 +1,16 @@
 import fs from 'fs';
 import { spawn } from 'child_process';
-import request from 'request';
+import https from 'https';
 import moment from 'moment';
 import { broadcast } from '@jeffriggle/ipc-bridge-server';
 import { getProcessUsage } from '../helpers/processUsage';
 import { sendServerHealth } from '../helpers/notifications';
 import events from '../events';
 import { updateStateAndBroadCast } from '../serverState';
+import { Octokit } from '@octokit/rest';
+const octokit = new Octokit();
 
-const appData = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + 'Library/Preferences' : '/var/local');
+const appData = process.env.APPDATA || (process.platform == 'darwin' ? `${process.env.HOME}/Library/Preferences` : process.env.HOME);
 const dir = appData + '/robitserver';
 
 let serverUsagePoll, upTime, childProc, serverContents;
@@ -44,8 +46,30 @@ function serverCleanUp() {
     sendServerHealth();
 }
 
+function dowloadFile(uri, destination) {
+    return new Promise((resolve, reject) => {
+        console.log('Downloading ', uri, ' to ', destination);
+        const file = fs.createWriteStream(destination);
+        https.get(uri, response => {
+            if (response.statusCode === 302) {
+                https.get(response.headers.location, response => {
+                    response.pipe(file);
+                    file.on('finish', () => {
+                        file.close(resolve);
+                    });
+                });
+            } else {
+                response.pipe(file);
+                file.on('finish', () => {
+                    file.close(resolve);
+                });
+            }
+        });
+    });
+}
+
 function spawnLocalServer(dir, config) {
-    fs.writeFileSync(dir + '/server.js', serverContents);
+    console.log('Creating local server');
     fs.writeFileSync(dir + '/config.json', JSON.stringify(config));
     childProc = spawn('node', [`${dir}/server.js`,  `${dir}/config.json`]);
 
@@ -70,15 +94,16 @@ function spawnLocalServer(dir, config) {
 function fetchAndStartServer(dir, config) {
     return new Promise((resolve, reject) => {
         console.log('Server contents are unknown fetching those now');
-        request.get('https://raw.githubusercontent.com/JeffreyRiggle/somerobit/master/dist/bundle.js', (err, response, body) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-
-            serverContents = body;
-            spawnLocalServer(dir, config);
-            resolve({ success: true });
+        octokit.repos.getRelease({
+            owner: 'JeffreyRiggle',
+            repo: 'somerobit',
+            release_id: 'latest'
+        }).then(result => {
+            const asset = result.data.assets.filter(asset => asset.name === 'bundle.js');
+            dowloadFile(asset[0].browser_download_url, `${dir}/server.js`).then(() => {
+                spawnLocalServer(dir, config);
+                resolve({ success: true });
+            });
         });
     });
 }
