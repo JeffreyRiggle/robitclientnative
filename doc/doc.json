@@ -1,0 +1,8 @@
+{
+    "index": "About",
+    "pages": {
+        "About": "About.md",
+        "Installation": "Installation.md",
+        "Technologies": "Technology.md"
+    }
+}

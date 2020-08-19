@@ -30,7 +30,6 @@ function startRunningDockerServer(config) {
     return new Promise((resolve, reject) => {
         exec('docker pull jeffriggle/robit && docker run -p 8080:8080 -d jeffriggle/robit', (err, stdout, stderr) => {
             if (err) {
-                console.log('Failed to start docker');
                 reject(err)
                 return;
             }
