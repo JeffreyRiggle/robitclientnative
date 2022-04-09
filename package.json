@@ -30,7 +30,7 @@
   "dependencies": {
     "@jeffriggle/ipc-bridge-server": "^1.0.6",
     "@octokit/rest": "^18.0.3",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "request": "^2.88.0"
   }
 }
