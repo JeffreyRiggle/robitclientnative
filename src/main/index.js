@@ -12,7 +12,8 @@ function createMainWindow() {
   start();
   const window = new BrowserWindow({
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      contextIsolation: false
     }
   });
 
